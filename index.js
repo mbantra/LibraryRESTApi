@@ -1,8 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv').config();
 const app = express();
 
 const Book = require('./models/bookModel');
