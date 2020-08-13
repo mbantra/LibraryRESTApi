@@ -4,17 +4,34 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
 const app = express();
 
+const utils = require('./utils/util');
 const Book = require('./models/bookModel');
 const bookService = require('./services/bookService');
 const bookRouter = require("./routers/bookRouter")(Book, bookService);
 
+const passport = require('passport');
+require('./auth/auth');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/api/book', bookRouter);
+const routes = require('./routers/routes');
+const adminRoutes = require('./routers/adminRouter');
+
+app.use('/', routes);
+app.use('/admin', passport.authenticate('jwt', { session: false }), utils.checkRoles('Admin'), adminRoutes);
+app.use('/api/book', passport.authenticate('jwt', { session: false }), bookRouter);
 //app.use('/api/author', authorRouter);
 /* 
     firstName, lastName, country, age
 */
+
+app.use((err, req, res, next) => {
+    if(err) {
+        res.status(err.status || 500);
+        return res.json({ error: err});       
+    }
+    next();
+})
 
 app.get('/', (req, res) => {
     res.send("Welcome to my Library API");
